@@ -1,0 +1,124 @@
+name: Release
+
+permissions:
+  contents: write
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio-${{ hashFiles('**/*.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-
+
+      - name: Set Up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
+      - name: Adjust INI for Release
+        run: sh .github/scripts/release.sh
+
+      - name: Build PlatformIO Project
+        run: pio run
+
+      - name: Create Artifacts Directory
+        run: mkdir -p artifacts
+
+      - name: Archive Firmware
+        run: |
+          find .pio/build -name "firmware.bin" -exec sh -c 'cp "{}" "artifacts/firmware_$(basename $(dirname {})).bin"' \;
+        working-directory: ${{ github.workspace }}
+
+      - name: Archive OTA ESP32
+        run: |
+          for board in $(find .pio/build -maxdepth 1 -type d -printf '%f\n'); do
+            case "$board" in
+              "geekmagic-smalltv"|"esp8266")
+                continue;;
+              *)
+                cp ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin "artifacts/0xe000_boot_${board}.bin";;
+            esac
+          done
+        working-directory: ${{ github.workspace }}
+
+      - name: Archive Artifacts with Address
+        run: |
+          declare -A board_map=(
+              ["esp8266"]="0x0000_firmware"
+              ["geekmagic-smalltv"]="0x0000_firmware"
+              ["esp32"]="0x10000_firmware 0x1000_bootloader 0x8000_partitions"
+              ["esp32-s2"]="0x10000_firmware 0x1000_bootloader 0x8000_partitions"
+              ["esp32-s3"]="0x10000_firmware 0x1000_bootloader 0x8000_partitions"
+              ["lilygo-t-display-s3"]="0x10000_firmware 0x1000_bootloader 0x8000_partitions"
+          )
+
+          # Iterate through each board and copy corresponding files
+          for board in "${!board_map[@]}"; do
+            if [ ! -d ".pio/build/$board" ]; then
+              continue
+            fi
+            for address in ${board_map[$board]}; do
+                address_prefix=$(echo $address | cut -d'_' -f1)
+                file_type=$(echo $address | cut -d'_' -f2)
+                find .pio/build/$board -name "${file_type}.bin" -exec sh -c 'cp "{}" "artifacts/'"${address_prefix}_${file_type}_${board}.bin"'"' \;
+            done
+            rm -rf .pio/build/$board
+          done
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: builded-artifacts
+          path: artifacts/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract Version from leafminer.h
+        id: extract_version
+        run: echo "::set-output name=version::$(grep -o '_VERSION "[^"]*' src/leafminer.h | cut -d'"' -f2)"
+
+      - name: Create GitHub Release
+        run: gh release create v${{ steps.extract_version.outputs.version }} -t "Release ${{ steps.extract_version.outputs.version }}" -n "Release ${{ steps.extract_version.outputs.version }}" -F CHANGELOG.md
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: builded-artifacts
+          path: artifacts
+
+      - name: Upload Artifacts to Release
+        run: |
+          for file in artifacts/*.bin; do
+            gh release upload v${{ steps.extract_version.outputs.version }} "$file" --clobber;
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
