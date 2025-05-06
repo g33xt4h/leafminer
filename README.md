@@ -21,9 +21,8 @@ The SHA256 code is based on a tweaked version of [NerdSHA256plus](https://github
 
 ## Supported Boards:
 
-| Board             | Status | Expected Hashrate |
-| :---------------- | :----: | :---------------- |
-| ESP8266           |   🟧  | ±16 kH/s          |
+| Board             | Status  | Expected Hashrate |
+| ESP8266           |   🟩   | ±16 kH/s          |
 | ESP32             |   🟩   | ±48 kH/s          |
 | ESP32-S2          |   🟩   | ±19 kH/s          |
 | ESP32-S3          |   🟩   | ±80 kH/s          |
@@ -32,7 +31,6 @@ The SHA256 code is based on a tweaked version of [NerdSHA256plus](https://github
 
 _Legend_
 | Icon | Description |
-| :--- | :-------------- |
 | 🟩 | Fully functional |
 | 🟧 | Partially functional |
 | 🟥 | Not working |
@@ -40,7 +38,6 @@ _Legend_
 ## Mining Method:
 
 - [x] [Solo](docs/solo-mining.md)
-- [ ] [Cascade](docs/cascade-mining.md) (aka 1 Main and N nodes)
 
 # How to Use
 
@@ -50,25 +47,6 @@ _Legend_
 - (optional) VSCode + Platformio.io
 
 ## Build & Install
-
-### Flash Binary
-
-- Download the binary file for your board
-
-| Board                                                    | Link                                                         |
-| :------------------------------------------------------- | :----------------------------------------------------------- |
-| [ESP8266](https://s.click.aliexpress.com/e/_EuwffHJ)     | [0.0.17](https://github.com/matteocrippa/leafminer/releases) |
-| [GeekMagic SmartTV]()                                    | [0.0.17](https://github.com/matteocrippa/leafminer/releases) |
-| [ESP32](https://s.click.aliexpress.com/e/_Ey6AJnT)       | [0.0.17](https://github.com/matteocrippa/leafminer/releases) |
-| [ESP32-S2](https://s.click.aliexpress.com/e/_EGJcibR)    | [0.0.17](https://github.com/matteocrippa/leafminer/releases) |
-| [ESP32-S3](https://s.click.aliexpress.com/e/_EJbAXyl)    | [0.0.17](https://github.com/matteocrippa/leafminer/releases) |
-| [LILYGO-T-S3](https://s.click.aliexpress.com/e/_ExRWk6H) | [0.0.17](https://github.com/matteocrippa/leafminer/releases) |
-
-- Browse to [ESPWebtool](https://esp.huhn.me/) using a Chrome based browser and upload the file according to the address in the file name.
-
-For example this is how ESP32-S3 will look like:
-
-<img width="687" alt="LeafMiner Web flash" src="https://github.com/matteocrippa/leafminer/assets/475463/f483b8fe-a563-4249-98f8-092a45a9b4f8">
 
 ### Build from Scratch
 
@@ -111,7 +89,7 @@ After resetting, rediscover the _LEAFMINER_ WiFi and go through the setup proces
 
 ## Mass Deploy
 
-Starting from version **0.0.6**, we now offer the capability for mass deployment through Platformio. If you need to apply the same configuration to multiple devices, simply modify the `massdeploy.h` file, uncomment the relevant lines, and customize the parameters according to your requirements. This allows you to effortlessly deploy a pre-configured firmware to multiple devices.
+Now offers the capability for mass deployment through Platformio. If you need to apply the same configuration to multiple devices, simply modify the `massdeploy.h` file, uncomment the relevant lines, and customize the parameters according to your requirements. This allows you to effortlessly deploy a pre-configured firmware to multiple devices.
 
 ## Donate
 
@@ -119,9 +97,7 @@ If you want to support this project, consider donating:
 
 |                     |                                                  |
 | :------------------ | :----------------------------------------------- |
-| AliExpress Referral | Use referral links in the list of hardware above |
-| ⚡️ Lightning       | `leafminer@lifpay.me`                            |
-| Bitcoin             | `bc1quqr7agnx6e0k9kn8h24zfj5dueeurhzflt3qjg`     |
+| Bitcoin             | 'bc1q6hn99mjumn9gsevvr0v2ptvs8463u76mwk7chh'     |
 
 ## Credits
 
